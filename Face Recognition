@@ -1,0 +1,41 @@
+import cv2
+import face_recognition
+
+# Load the known images (use images of people to recognize)
+known_image = face_recognition.load_image_file('person1.jpg')
+known_encoding = face_recognition.face_encodings(known_image)[0]
+
+# Store known faces and names
+known_faces = [
+    known_encoding
+]
+known_names = [
+    "Person 1"
+]
+
+# Load an unknown image to recognize
+unknown_image = face_recognition.load_image_file('unknown_person.jpg')
+unknown_encodings = face_recognition.face_encodings(unknown_image)
+
+# Convert the image to display using OpenCV
+image_to_display = cv2.cvtColor(unknown_image, cv2.COLOR_RGB2BGR)
+
+# Loop over each face found in the unknown image
+for face_encoding in unknown_encodings:
+    matches = face_recognition.compare_faces(known_faces, face_encoding)
+    name = "Unknown"
+
+    # If a match was found, get the name of the known person
+    if True in matches:
+        first_match_index = matches.index(True)
+        name = known_names[first_match_index]
+
+    # Draw a rectangle and label around the face in the output image
+    top, right, bottom, left = face_recognition.face_locations(unknown_image)[0]
+    cv2.rectangle(image_to_display, (left, top), (right, bottom), (0, 255, 0), 2)
+    cv2.putText(image_to_display, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+# Display the image
+cv2.imshow('Face Recognition', image_to_display)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
